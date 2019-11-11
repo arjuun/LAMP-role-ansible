@@ -1,0 +1,9 @@
+---
+# vars file for lamp
+
+domain: www.example.com
+
+mysql_root: mysqlroot123
+mysql_database: wordpress
+mysql_user: wpuser
+mysql_password: wpuser123

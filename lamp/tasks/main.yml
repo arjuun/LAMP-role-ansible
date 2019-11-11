@@ -1,0 +1,84 @@
+---
+# tasks file for lamp
+- name: "LampStack - Installing Apache/php"
+  yum:
+    name: 
+      - httpd
+      - php
+      - php-mysql
+    state: present
+      
+- name: "LampStack - Creating Virtualhost"
+  template:
+    src: virtualhost.tmpl
+    dest: "/etc/httpd/conf.d/{{ domain }}.conf"
+  
+- name: "LampStack - Creating Documentroot"
+  file:
+    path: "/var/www/html/{{ domain }}"
+    state: directory
+    owner: apache
+    group: apache
+      
+- name: "LampStack - Creating info.html"
+  copy:
+    src: info.html
+    dest: "/var/www/html/{{ domain }}/"
+  
+- name: "LampStack - Creating info.php"
+  copy:
+    src: info.php
+    dest: "/var/www/html/{{ domain }}/info.php"
+      
+- name: "LampStack - Apche Restarting/Enabling"
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes    
+
+- name: "LampStack - Mariadb-server Instalaltion"
+  yum:
+    name:
+      - mariadb-server
+      - MySQL-python
+    state: present
+      
+- name: "LampStack - Mariadb-server Restarting/Enabling"
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+      
+- name: "LampStack - Mariadb-server Reset Root-Password"
+  ignore_errors: yes
+  mysql_user:
+    login_user: root
+    login_password: ''
+    user: root
+    password: "{{ mysql_root }}"
+    host_all: yes
+      
+- name: "LampStack - Mariadb-server Removing Anonymous Users"
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root }}"
+    user: ''
+    host_all: yes
+    state: absent
+      
+- name: "LampStack - Mariadb-server Creating Extra Database"
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root }}"
+    name: "{{ mysql_database }}"
+    state: present
+      
+- name: "LampStack - Mariadb-server Creating Extra User"
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root}}"
+    name: "{{ mysql_user }}"
+    state: present
+    password: "{{ mysql_password }}"
+    host: localhost
+    priv: "{{ mysql_database }}.*:ALL" 
