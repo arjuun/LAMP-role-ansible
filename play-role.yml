@@ -1,0 +1,29 @@
+---
+- name: "Installing Wordpress"
+  hosts: all
+  become: yes
+  roles:
+    - lamp
+  tasks:
+    
+    - name: "Wordpress - Downloading"
+      get_url:
+        url: https://wordpress.org/wordpress-4.9.2.tar.gz
+        dest: /tmp/wordpress.tar.gz
+          
+    - name: "Wordpress - Extracting"
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /tmp/
+        remote_src: yes        
+    
+    - name: "Wordpress - Copying Wordpress To Documentroot"
+      copy:
+        src: /tmp/wordpress/
+        dest: "/var/www/html/{{ domain }}"
+        remote_src: yes
+    
+    - name: "Wordpress - Uploading wp-config.php"
+      template:
+        src: wp-config.php.tmpl
+        dest: "/var/www/html/{{ domain }}/wp-config.php"    
